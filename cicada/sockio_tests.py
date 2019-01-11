@@ -6,13 +6,30 @@ def intohere(data):
 
 
 def inetguest(typeinet):
-    with typeinet('freechess.org', 5000) as muhsock:
-        if muhsock.as_guest():
-            while muhsock.is_connected:
-                muhsock.read_into(on_read=intohere)
+  """
+    read_into :: def read_into(self, on_read)
 
+      This will dup the socket but doesn't destroy the parent!
+      From this point on it can only read,
+      while the parent can only write.
+  
+  """
+  with typeinet('freechess.org', 5000) as muhsock:
+    if muhsock.as_guest():
+      muhsock.read_into(on_read=intohere)
+      while muhsock.is_connected:
+        x = input();
+        try:
+          d_out = muhsock.write(x)
+        except Exception as E:
+          sys.stderr.write("[{}] : {} {} !err \n".format(time.time(), E, d_out))
+          sys.exit()
+            
+inetguest(INET_TCP)
 
-
+#
+#
+#
 def inethost(typeinet, ip, port, on_exit=None, on_read=intohere, on_client=None):
     global muhsock
     with typeinet(ip, port, on_exit=on_exit) as muhsock:
@@ -24,11 +41,12 @@ def inethost(typeinet, ip, port, on_exit=None, on_read=intohere, on_client=None)
 
                 except:
                     raise
-
         else:
             print('nope')
             return
 
+        
+        
 def onexit():
     global muhsock
     print(muhsock.exmsg)
@@ -48,7 +66,6 @@ class inet_WO_Context:
 
 
 class udsguest:
-
     def __init__(self, sock, uds, on_exit=None):
         try:
             with sock(uds) as self.sock:
@@ -66,5 +83,4 @@ class udsguest:
                 self.sock.write(x)
         except:
             raise
-
 iwoc = inet_WO_Context(_sockio.INET_TCP)
