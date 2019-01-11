@@ -1,4 +1,3 @@
-"""
 
     NOTE: Throughout this documentation the cicada_d core engine will be refered as "theCore"
 
